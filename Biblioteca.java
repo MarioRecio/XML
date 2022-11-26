@@ -1,9 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-package Model;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,75 +23,10 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 
-/**
- *
- * @author Nacho
- */
+
 public class Biblioteca {
 
     ArrayList<Libro> libroList = new ArrayList<Libro>();
-
-    public int crearLibro(Libro libro) {
-
-        try {
-            libroList = leerLibrosXML();
-
-            libroList.add(libro);
-
-            try {
-                actualizarXML(libroList);
-
-                Alert a = new Alert(Alert.AlertType.CONFIRMATION);
-
-                a.setHeaderText("¡¡¡EXITO!!!");
-                a.setContentText("Se ha añadido el libro al documento XML");
-                a.showAndWait();
-
-            } catch (Exception e) {   //si falla escribirlo en el xml borrara el libro del arrayList
-
-                Alert a = new Alert(Alert.AlertType.ERROR);
-
-                a.setHeaderText("¡¡¡ERROR!!!");
-                a.setContentText("No se ha podido añadir el libro al documento XML");
-                a.showAndWait();
-                libroList.remove(libro);
-            }
-
-        } catch (ParserConfigurationException ex) {
-            Logger.getLogger(Biblioteca.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SAXException ex) {
-            Logger.getLogger(Biblioteca.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(Biblioteca.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        int id = libro.getId();
-
-        return id;
-    }
-
-    public static Libro recuperarLibro(int id) {
-        Libro l = new Libro();
-        l = null;
-        try {
-            ArrayList<Libro> lista = leerLibrosXML();
-
-            for (Libro lib : lista) {
-                if (id == lib.getId()) {
-                    l = lib;
-                }
-            }
-
-        } catch (SAXException ex) {
-            Logger.getLogger(Biblioteca.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ParserConfigurationException ex) {
-            Logger.getLogger(Biblioteca.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(Biblioteca.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        return l;
-    }
 
     public static ArrayList<Libro> leerLibrosXML() throws ParserConfigurationException, SAXException, IOException {
         //Initialize a list of employees
@@ -192,72 +121,5 @@ public class Biblioteca {
         } catch (Exception e) {
             System.out.println(e);
         }
-    }
-
-    public static Libro mostrarLibro(Libro l) {
-
-        //preguntar si es un metodo inservible
-        /*try {
-            ArrayList<Libro> lista = leerLibrosXML();
-
-            for (Libro lib : lista) {
-                
-            }
-
-        } catch (SAXException ex) {
-            Logger.getLogger(Biblioteca.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ParserConfigurationException ex) {
-            Logger.getLogger(Biblioteca.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(Biblioteca.class.getName()).log(Level.SEVERE, null, ex);
-        }*/
-        return l;
-    }
-
-    public boolean borrarLibro(int id) {
-
-        boolean resultado=false;
-        
-        try {
-            libroList = leerLibrosXML();
-            Libro borrar = new Libro();
-            borrar = null;
-
-            for (Libro l : libroList) {
-                if (id == l.getId()) {
-                    borrar = l;
-                }
-            }
-
-            if (borrar == null) {
-                Alert a = new Alert(Alert.AlertType.ERROR);
-                a.setHeaderText("¡¡¡ERROR!!!");
-                a.setContentText("No hay ningun libro con esa ID");
-                a.showAndWait();
-            } else {
-
-                libroList.remove(borrar);
-
-                try {
-                    actualizarXML(libroList);
-                    resultado=true;
-
-                    
-
-                } catch (Exception e) {
-                    System.out.println(e);
-                }
-
-            }
-
-        } catch (ParserConfigurationException ex) {
-            Logger.getLogger(Biblioteca.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SAXException ex) {
-            Logger.getLogger(Biblioteca.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(Biblioteca.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        return resultado;
     }
 }
