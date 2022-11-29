@@ -1,1 +1,354 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/javafx/FXML2.java to edit this template
+ */
+package seccion.pkg3;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.stage.Stage;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
+import org.xml.sax.SAXException;
+
+
+    @FXML
+    private TextField idTF;
+    @FXML
+    private TextField marcaTF;
+    @FXML
+    private TextField modeloTF;
+    @FXML
+    private TextField añoTF;
+    @FXML
+    private TextField tipoTF;
+    @FXML
+    private TextField colorTF;
+    @FXML
+    private TextField nodoTF;
+
+    ArrayList<Telefono> listaTelefonos = new ArrayList();
+    int index = 0;
+
+    String idTemp;
+    String marcaTm="";
+    String modeloTm;
+    String añoTm;
+    String tipoTm;
+    String colorTm;
+
+    @FXML
+    private TextArea resultado;
+
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        try {
+            // TODO
+            listaTelefonos = leerLibrosXML();
+
+            for (Telefono tel : listaTelefonos) {
+                if (tel.getId() == 0) {
+                    idTF.setText(Integer.toString(tel.getId()));
+                    marcaTF.setText(tel.getMarca());
+                    modeloTF.setText(tel.getModelo());
+                    añoTF.setText(Integer.toString(tel.getAño()));
+                    tipoTF.setText(tel.getTipo());
+                    colorTF.setText(tel.getColor());
+                }
+            }
+
+            nodoTF.setText("Cantidad de Telefonos: " + listaTelefonos.size());
+
+            File file = new File("telefonos.xml");
+            FileReader fr = new FileReader(file);
+            BufferedReader br = new BufferedReader(fr);
+
+            String linea = "";
+            String contenido = "";
+
+            while ((linea = br.readLine()) != null) {
+                contenido += linea + "\n";
+            }
+
+            resultado.setText(contenido);
+
+        } catch (ParserConfigurationException ex) {
+            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SAXException ex) {
+            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    @FXML
+    private void retroceder(ActionEvent event) {
+        index--;
+        if (index >= 0) {
+            //Bicicleta bici = new Bicicleta();
+            idTF.setText(Integer.toString(listaTelefonos.get(index).getId()));
+            marcaTF.setText(listaTelefonos.get(index).getMarca());
+            modeloTF.setText(listaTelefonos.get(index).getModelo());
+            añoTF.setText(Integer.toString(listaTelefonos.get(index).getAño()));
+            tipoTF.setText(listaTelefonos.get(index).getTipo());
+            colorTF.setText(listaTelefonos.get(index).getColor());
+        } else {
+            index = 0;
+        }
+    }
+
+    @FXML
+    private void avanzar(ActionEvent event) {
+
+        if(!marcaTm.equals(marcaTF.getText())){
+            if(!marcaTm.equals("")){
+                System.out.println("update");
+            }
+        }
+        if(idTF.getText().equals("")&& !idTemp.equals("")){
+            System.out.println("delete");
+        }
+        
+        index++;
+
+        if (index < listaTelefonos.size()) {
+            idTF.setText(Integer.toString(listaTelefonos.get(index).getId()));
+            marcaTF.setText(listaTelefonos.get(index).getMarca());
+            modeloTF.setText(listaTelefonos.get(index).getModelo());
+            añoTF.setText(Integer.toString(listaTelefonos.get(index).getAño()));
+            tipoTF.setText(listaTelefonos.get(index).getTipo());
+            colorTF.setText(listaTelefonos.get(index).getColor());
+
+        } else {
+            
+            if(marcaTm.equals("") && !marcaTF.getText().equals("")){
+                System.out.println("insert");
+            }
+            
+            index = listaTelefonos.size();
+            idTF.setText("");
+            marcaTF.setText("");
+            modeloTF.setText("");
+            añoTF.setText("");
+            tipoTF.setText("");
+            colorTF.setText("");
+            
+        }
+        idTemp=idTF.getText();
+        marcaTm=marcaTF.getText();
+        modeloTm=modeloTF.getText();
+        añoTm=añoTF.getText();
+        tipoTm=tipoTF.getText();
+        colorTm=colorTF.getText();
+
+    }
+
+    public static ArrayList<Telefono> leerLibrosXML() throws ParserConfigurationException, SAXException, IOException {
+        //Initialize a list of employees
+        ArrayList<Telefono> telefonos = new ArrayList<Telefono>();
+        Telefono telefono = null;
+
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document document = builder.parse(new File("Telefonos.xml"));
+        document.getDocumentElement().normalize();
+        NodeList nList = document.getElementsByTagName("telefono");
+        for (int temp = 0; temp < nList.getLength(); temp++) {
+            Node node = nList.item(temp);
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                Element eElement = (Element) node;
+                //Create new Employee Object
+
+                telefono = new Telefono();
+                telefono.setId(Integer.parseInt(eElement.getAttribute("id")));
+                telefono.setMarca(eElement.getElementsByTagName("marca").item(0).getTextContent());
+                telefono.setModelo(eElement.getElementsByTagName("modelo").item(0).getTextContent());
+                telefono.setAño(Integer.parseInt(eElement.getElementsByTagName("anyo").item(0).getTextContent()));
+                telefono.setTipo(eElement.getElementsByTagName("tipo").item(0).getTextContent());
+                telefono.setColor(eElement.getElementsByTagName("color").item(0).getTextContent());
+
+                //aqui un if i==0 para mostrarlo la primera vez
+                //Add Bicicleta to list
+                telefonos.add(telefono);
+            }
+        }
+        return telefonos;
+    }
+
+    @FXML
+    private void añadirLibro(ActionEvent event) {
+
+        if (idTF.getText().equals("")) {
+            if (marcaTF.getText().equals("") || modeloTF.getText().equals("") || añoTF.getText().equals("") || tipoTF.getText().equals("") || colorTF.getText().equals("")) {
+                Alert a = new Alert(Alert.AlertType.ERROR);
+                a.setHeaderText("¡¡¡ERROR!!!");
+                a.setContentText("Los campos no pueden estar vacios");
+                a.showAndWait();
+            } else {
+                try {
+
+                    Telefono telefono = new Telefono();
+
+                    int id = listaTelefonos.get(listaTelefonos.size() - 1).getId() + 1;
+                    telefono.setId(id);
+                    telefono.setMarca(marcaTF.getText());
+                    telefono.setModelo(modeloTF.getText());
+                    telefono.setAño(Integer.parseInt(añoTF.getText()));
+                    telefono.setTipo(tipoTF.getText());
+                    telefono.setColor(colorTF.getText());
+
+                    listaTelefonos = leerLibrosXML();
+
+                    listaTelefonos.add(telefono);
+
+                    try {
+                        actualizarXML(listaTelefonos);
+                        idTF.setText(Integer.toString(id));
+
+                        Alert a = new Alert(Alert.AlertType.CONFIRMATION);
+
+                        a.setHeaderText("¡¡¡EXITO!!!");
+                        a.setContentText("Se ha añadido el libro al documento XML");
+                        a.showAndWait();
+                        nodoTF.setText("Cantidad de Telefonos: " + listaTelefonos.size());
+                        String cont = actualizarResultado();
+                        resultado.setText(cont);
+
+                    } catch (Exception e) {   //si falla escribirlo en el xml borrara el libro del arrayList
+
+                        Alert a = new Alert(Alert.AlertType.ERROR);
+
+                        a.setHeaderText("¡¡¡ERROR!!!");
+                        a.setContentText("No se ha podido añadir el libro al documento XML");
+                        a.showAndWait();
+                        listaTelefonos.remove(telefono);
+                        nodoTF.setText("Cantidad de Telefonos: " + listaTelefonos.size());
+                    }
+
+                } catch (ParserConfigurationException ex) {
+                    Logger.getLogger(Telefono.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (SAXException ex) {
+                    Logger.getLogger(Telefono.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException ex) {
+                    Logger.getLogger(Telefono.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        } else {
+            Alert a = new Alert(Alert.AlertType.ERROR);
+
+            a.setHeaderText("¡¡¡ERROR!!!");
+            a.setContentText("No se puede añadir un libro ya existente");
+            a.showAndWait();
+        }
+    }
+
+    public static void actualizarXML(ArrayList<Telefono> lista) {
+        try {
+
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            DOMImplementation imp = dBuilder.getDOMImplementation();
+
+            Document documento = imp.createDocument(null, "telefonos", null);
+            documento.setXmlVersion("1.0");
+
+            for (Telefono tel : lista) {
+                Element telefono = documento.createElement("telefono");
+                telefono.setAttribute("id", String.valueOf(tel.getId()));
+
+                Element marca = documento.createElement("marca");
+                Text marcaTXT = documento.createTextNode(tel.getMarca());
+                marca.appendChild(marcaTXT);
+                telefono.appendChild(marca);
+
+                Element modelo = documento.createElement("modelo");
+                Text modeloTXT = documento.createTextNode(tel.getModelo());
+                modelo.appendChild(modeloTXT);
+                telefono.appendChild(modelo);
+
+                Element año = documento.createElement("anyo");
+                Text añoTXT = documento.createTextNode(String.valueOf(tel.getAño()));
+                año.appendChild(añoTXT);
+                telefono.appendChild(año);
+
+                Element tipo = documento.createElement("tipo");
+                Text tipoTXT = documento.createTextNode(tel.getTipo());
+                tipo.appendChild(tipoTXT);
+                telefono.appendChild(tipo);
+
+                Element color = documento.createElement("color");
+                Text colorTXT = documento.createTextNode(String.valueOf(tel.getColor()));
+                color.appendChild(colorTXT);
+                telefono.appendChild(color);
+
+                documento.getDocumentElement().appendChild(telefono);
+            }
+
+            Source src = new DOMSource(documento);
+            Result res = new StreamResult(new File("Telefonos.xml"));
+
+            Transformer trans = TransformerFactory.newInstance().newTransformer();
+            trans.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            trans.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+            trans.setOutputProperty(OutputKeys.INDENT, "yes");
+            trans.transform(src, res);
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    public static String actualizarResultado() {
+        try {
+            File file = new File("telefonos.xml");
+            FileReader fr = new FileReader(file);
+            BufferedReader br = new BufferedReader(fr);
+
+            String linea = "";
+            String contenido = "";
+
+            while ((linea = br.readLine()) != null) {
+                contenido += linea + "\n";
+            }
+
+            return contenido;
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return null;
+    }
+
+}
